@@ -162,6 +162,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
    //------------------------------metodos de instrumento-----------------------------
                     
                     if(mensaje.equals("TiposInstrumentos guardado")){
+                       
                         String mensaje_2 = entrada.readUTF();  
                         String mensaje_3 = entrada.readUTF();  
                         String mensaje_4 = entrada.readUTF();  
@@ -327,8 +328,8 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
      Object[] columna=new Object[modelo.getModeloTipoInstrumento().getColumnCount()];
      
        columna[0]=tip.getCodigoInstrumento();
-       columna[1]=tip.getCodigoInstrumento();
-       columna[2]=tip.getCodigoInstrumento();
+       columna[1]=tip.getNombreInstrumento();
+       columna[2]=tip.getUnidadInstrumento();
        
         modelo.getModeloTipoInstrumento().addRow(columna);
         vista.getTabla1().setModel(modelo.getModeloTipoInstrumento());

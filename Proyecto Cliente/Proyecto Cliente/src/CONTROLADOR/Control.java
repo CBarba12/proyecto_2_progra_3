@@ -163,6 +163,10 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
                     } else if (mensaje.equals("TiposInstrumentos eliminado")) {
                       String mensaje_2 = entrada.readUTF();
                       borrarTipoInstrumentos(mensaje_2);
+                    }else if (mensaje.equals("actualizar_jcombobox")) {
+                        
+                      String mensaje_2 = entrada.readUTF();
+                      actualizar_jcombobox(mensaje_2);
                     }
 
                     // Realiza las acciones necesarias en respuesta al mensaje recibido
@@ -410,7 +414,16 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
             ex.printStackTrace();
         }
     }
-
+    
+    public void actualizar_jcombobox(String m){
+    
+        
+         vista.getjCBTipoInstrumentos().addItem(m);
+        
+        vista.getjCBTipoInstrumentos().repaint();
+    
+    
+    }
     public void actualizarJComboBoxInstrumentos() {
         int total;
 
@@ -428,6 +441,10 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
 
         vista.getjCBTipoInstrumentos().repaint();
     }
+    
+    
+    
+    
 
     public void clickTablaTipoInstrumentos(java.awt.event.MouseEvent evt) {
         if (evt.getClickCount() == 1) { // Detectar un solo clic

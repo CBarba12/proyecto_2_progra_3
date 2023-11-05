@@ -54,16 +54,13 @@ public class Server {
     }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------
-
 class ClientHandler implements Runnable {
 
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
-    
-    
+
     com.mysql.jdbc.PreparedStatement ps;
     ResultSet rs;
 
@@ -101,7 +98,7 @@ class ClientHandler implements Runnable {
                         guardarTipoInstrumentos(in, out);
                         break;
                     case "borrarTipoInstrumentos":
-                           borrarTipoInstrumentos(in, out);
+                        borrarTipoInstrumentos(in, out);
                         break;
                     case "guardarTipoInstrumentos_UPDATE":
 //                                actualizarTipoInstrumentos(in, out);
@@ -111,6 +108,10 @@ class ClientHandler implements Runnable {
                         break;
                     default:
                         System.out.println("NO HAY COINCIDENCIA");
+                        
+                        
+                        
+                 actualizar_jcombobox();
                 }
 
                 // Procesa y muestra el mensaje al usuario del cliente
@@ -124,49 +125,45 @@ class ClientHandler implements Runnable {
         }
     }
 
-    
-    
     private void guardarTipoInstrumentos(DataInputStream in, DataOutputStream out) throws SQLException {
         try {
             String mensaje_2 = in.readUTF();
             String mensaje_3 = in.readUTF();
             String mensaje_4 = in.readUTF();
-            
+
             TipoInstrumentos tipo_instru = new TipoInstrumentos(mensaje_2, mensaje_3, mensaje_4);
             String resultado = guardarTipoInstrumentos_BASE(tipo_instru);
-            
-            if(resultado.equals("TiposInstrumentos guardado")){
-                 sendMessageToAllClients(resultado);
-                 sendMessageToAllClients(mensaje_2);
-                 sendMessageToAllClients(mensaje_3);
-                 sendMessageToAllClients(mensaje_4);
+
+            if (resultado.equals("TiposInstrumentos guardado")) {
+                sendMessageToAllClients(resultado);
+                sendMessageToAllClients(mensaje_2);
+                sendMessageToAllClients(mensaje_3);
+                sendMessageToAllClients(mensaje_4);
             }
-            
-            
-            
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-     private void borrarTipoInstrumentos(DataInputStream in, DataOutputStream out) {
+
+    private void borrarTipoInstrumentos(DataInputStream in, DataOutputStream out) {
         try {
             String mensaje_2 = in.readUTF();
             String mensaje_3 = in.readUTF();
             String mensaje_4 = in.readUTF();
             TipoInstrumentos tipo_instru = new TipoInstrumentos(mensaje_2, mensaje_3, mensaje_4);
             String resultado = borrarTipoInstrumentos_BASE(tipo_instru);
-            
-            if(resultado.equals("TiposInstrumentos eliminado")){
-                 sendMessageToAllClients(resultado); 
-                 sendMessageToAllClients(mensaje_2); 
+
+            if (resultado.equals("TiposInstrumentos eliminado")) {
+                sendMessageToAllClients(resultado);
+                sendMessageToAllClients(mensaje_2);
             }
-            
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     private void actualizarTipoInstrumentos(DataInputStream in, DataOutputStream out) {
         try {
             String mensaje_2 = in.readUTF();
@@ -174,22 +171,57 @@ class ClientHandler implements Runnable {
             String mensaje_4 = in.readUTF();
             TipoInstrumentos tipo_instru = new TipoInstrumentos(mensaje_2, mensaje_3, mensaje_4);
             String resultado = Actualizar_TipoInstrumentos_BASE(tipo_instru);
-          
-            if(resultado.equals("TiposInstrumentos actualizado")){
-                 sendMessageToAllClients(resultado);  
+
+            if (resultado.equals("TiposInstrumentos actualizado")) {
+                sendMessageToAllClients(resultado);
             }
-                    
-                    
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
-    
-    
-    
-    
-    
+
+ private void actualizar_jcombobox()throws SQLException {
+     Connection cone = null;
+   
+    ResultSet resultado = null;
+     
+     
+        try {
+        cone = conexion.getConnection();    
+         ps = (com.mysql.jdbc.PreparedStatement) (PreparedStatement) cone.prepareStatement("SELECT * FROM proyecto_progra_3.TiposInstrumentos");
+
+        rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            
+            String columna1 = resultado.getString("Codigo");
+            
+                sendMessageToAllClients("actualizar_jcombobox");
+                sendMessageToAllClients(columna1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        // Cierra los recursos, como la conexión y el resultado
+        if (resultado != null) {
+            try {
+                resultado.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (cone != null) {
+            try {
+                cone.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
     public String guardarTipoInstrumentos_BASE(Object OBJ) throws SQLException { // returnar un mensaje
 
         Connection cone = null;
@@ -218,7 +250,8 @@ class ClientHandler implements Runnable {
             return "Error guardando TiposInstrumentos";
         }
     }
-     public String borrarTipoInstrumentos_BASE(Object OBJ) {
+
+    public String borrarTipoInstrumentos_BASE(Object OBJ) {
         Connection cone = null;
         TipoInstrumentos tipoInstrumentos = (TipoInstrumentos) OBJ;
 
@@ -261,7 +294,8 @@ class ClientHandler implements Runnable {
             }
         }
     }
-     public String Actualizar_TipoInstrumentos_BASE(Object OBJ) {
+
+    public String Actualizar_TipoInstrumentos_BASE(Object OBJ) {
         Connection cone = null;
         TipoInstrumentos tipoInstrumentos = (TipoInstrumentos) OBJ;
 
@@ -308,8 +342,5 @@ class ClientHandler implements Runnable {
             }
         }
     }
-    
-    
-    
-    
+
 }

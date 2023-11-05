@@ -96,6 +96,7 @@ class ClientHandler implements Runnable {
                 switch (mensaje_1) {
                     case "guardarTipoInstrumentos":
                         guardarTipoInstrumentos(in, out);
+                         actualizar_jcombobox();
                         break;
                     case "borrarTipoInstrumentos":
                         borrarTipoInstrumentos(in, out);
@@ -111,7 +112,7 @@ class ClientHandler implements Runnable {
                         
                         
                         
-                 actualizar_jcombobox();
+                
                 }
 
                 // Procesa y muestra el mensaje al usuario del cliente
@@ -195,7 +196,7 @@ class ClientHandler implements Runnable {
         
         while (rs.next()) {
             
-            String columna1 = resultado.getString("Codigo");
+            String columna1 = rs.getString("Codigo");
             
                 sendMessageToAllClients("actualizar_jcombobox");
                 sendMessageToAllClients(columna1);

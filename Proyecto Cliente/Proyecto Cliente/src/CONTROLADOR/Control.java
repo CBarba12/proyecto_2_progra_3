@@ -40,8 +40,8 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
 
     private Socket socket;
     DataOutputStream salida;
-    DataInputStream  entrada;
-     String mensaje;
+    DataInputStream entrada;
+    String mensaje;
     //-------------------------------MODELO VISTA-------------------------------------
     public AdministraModelos modelo;
     public INTERFAZ vista;
@@ -49,8 +49,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
     //----------------------------------SERVIDOR------------------------------------------
     final String HOST = "localhost";
     final int PUERTO = 5000;
-    
-    
+
 //    private class ServerReader implements Runnable {
 //        @Override
 //        public void run() {
@@ -70,13 +69,10 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
 //            }
 //        }
 //    }
-    
-
     public Control(AdministraModelos m, INTERFAZ v) throws JDOMException {
         modelo = m;
         vista = v;
 
-        
         
         ImageIcon imagenBotonReporte = new ImageIcon("src/imagenes/imagenPdf.png");
         Icon imagenReporte = new ImageIcon(imagenBotonReporte.getImage().getScaledInstance(25, 20, Image.SCALE_DEFAULT));
@@ -123,8 +119,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
         vista.getJtxtFecha().setEditable(false);
         vista.getJtxtNumBusqCalib().setEditable(false);
         vista.getBtnReporteCalibracion().setEnabled(false);
-        
-        
+
         try {
 
             socket = new Socket(HOST, PUERTO);
@@ -133,11 +128,11 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
             entrada = new DataInputStream(socket.getInputStream());
 
             // Inicia un hilo para leer datos del servidor
-            
-            
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        this.vista.getBtnBorrarTI().setEnabled(true);
     }
 
     public void mostrar() {
@@ -148,54 +143,43 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
         vista.setVisible(false);
     }
 
-    
-    
-      @Override
+    @Override
     public void run() {
         try {
-             try {
+            try {
                 // Coloca aquí el código para leer datos del servidor
                 while (true) {
                     mensaje = entrada.readUTF();//mensaje y objeto
-                    
-                    
-   //------------------------------metodos de instrumento-----------------------------
-                    
-                    if(mensaje.equals("TiposInstrumentos guardado")){
-                       
-                        String mensaje_2 = entrada.readUTF();  
-                        String mensaje_3 = entrada.readUTF();  
-                        String mensaje_4 = entrada.readUTF();  
-                        
-                        TipoInstrumentos tipo=new TipoInstrumentos(mensaje_2,mensaje_3,mensaje_4);
+
+                    //------------------------------metodos de instrumento-----------------------------
+                    if (mensaje.equals("TiposInstrumentos guardado")) {
+
+                        String mensaje_2 = entrada.readUTF();
+                        String mensaje_3 = entrada.readUTF();
+                        String mensaje_4 = entrada.readUTF();
+
+                        TipoInstrumentos tipo = new TipoInstrumentos(mensaje_2, mensaje_3, mensaje_4);
                         guardarTipoInstrumentos(tipo);
-                    } else if(mensaje.equals("TiposInstrumentos eliminado")){
-                        
-                        
+                    } else if (mensaje.equals("TiposInstrumentos eliminado")) {
+                      String mensaje_2 = entrada.readUTF();
+                      borrarTipoInstrumentos(mensaje_2);
                     }
-                    
-                    
-                    
-                    
-                    
+
                     // Realiza las acciones necesarias en respuesta al mensaje recibido
                     JOptionPane.showMessageDialog(vista, mensaje);
-                   
+
                     // Puedes llamar a métodos en tu Control principal para manejar los mensajes
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-      }
-      catch(Exception e){
-          
-          e.printStackTrace();
-      }
-      
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
     }
-    
-    
-    
+
     //---Evento Action Performed---
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -274,9 +258,9 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
             buscarCalibracion();
         }
         if (e.getSource().equals(vista.getBtnReporteCalibracion())) {
-           ReporteCalibraciones reporte = new ReporteCalibraciones(vista.getJtxtNumCalibracion().getText(), vista.getJtxtFecha().getText(), vista.getJtxtMedicionesCalibracion().getText());
+            ReporteCalibraciones reporte = new ReporteCalibraciones(vista.getJtxtNumCalibracion().getText(), vista.getJtxtFecha().getText(), vista.getJtxtMedicionesCalibracion().getText());
             try {
-            
+
                 reporte.crearReporte();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Control.class.getName()).log(Level.SEVERE, null, ex);
@@ -323,47 +307,42 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
     }
 
     //---METODOS TIPO DE INSTRUMENTO---
-     public void guardarTipoInstrumentos(TipoInstrumentos tip){
-     
-     Object[] columna=new Object[modelo.getModeloTipoInstrumento().getColumnCount()];
-     
-       columna[0]=tip.getCodigoInstrumento();
-       columna[1]=tip.getNombreInstrumento();
-       columna[2]=tip.getUnidadInstrumento();
-       
+    public void guardarTipoInstrumentos(TipoInstrumentos tip) {
+
+        Object[] columna = new Object[modelo.getModeloTipoInstrumento().getColumnCount()];
+
+        columna[0] = tip.getCodigoInstrumento();
+        columna[1] = tip.getNombreInstrumento();
+        columna[2] = tip.getUnidadInstrumento();
+
         modelo.getModeloTipoInstrumento().addRow(columna);
         vista.getTabla1().setModel(modelo.getModeloTipoInstrumento());
-         
-     }
-     
+        vista.getBtnBorrarTI().setEnabled(true);
+    }
+
     public void guardarTipoInstrumentos() {
         String Codigo = vista.getJtxtCodigo().getText();
         String Nombre = vista.getJtxtNombre().getText();
         String Unidad = vista.getJtxtUnidad().getText();
         String tipo_de_accion = "guardarTipoInstrumentos";
-        
 
         try {
 
-               
-                System.out.println("Conectado");
-                salida = new DataOutputStream(socket.getOutputStream());
-                
-                salida.writeUTF(tipo_de_accion);             
-                salida.writeUTF(Codigo);
-                salida.writeUTF(Nombre);
-                salida.writeUTF(Unidad);
-          
-                entrada=new DataInputStream(socket.getInputStream());
-                
-              
+            System.out.println("Conectado");
+            salida = new DataOutputStream(socket.getOutputStream());
+
+            salida.writeUTF(tipo_de_accion);
+            salida.writeUTF(Codigo);
+            salida.writeUTF(Nombre);
+            salida.writeUTF(Unidad);
+
+            entrada = new DataInputStream(socket.getInputStream());
+
 //                String p=entrada.readUTF();
 //                 JOptionPane.showMessageDialog(vista, p);
-                 
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         actualizarJComboBoxInstrumentos();
         limpiarTipoInstrumentos();
     }
@@ -377,9 +356,37 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
         vista.getJtxtCodigo().setEnabled(true);
     }
 
-    public void borrarTipoInstrumentos(String m){
-    
+    public void borrarTipoInstrumentos(String m) {
+
+        String aux;
+        int pos;
+        boolean opcion = true;
+        if (vista.getTabla1().getSelectedRow() == -1) {
+            JOptionPane.showMessageDialog(null, "Debes elegir la fila a eliminar", "ERROR", JOptionPane.ERROR_MESSAGE);
+        } else {
+            aux = vista.getJtxtNombre().getText();
+            int linea = vista.getTabla1().getSelectedRow();
+            String nombre = (String) vista.getTabla1().getValueAt(linea, 1);
+
+            for (int i = 0; i < vista.getTabla1().getRowCount(); i++) {
+                String cadena = (String) vista.getTabla1().getValueAt(i, 0);
+
+                if (cadena.equals(m)) {
+                    vista.getTabla1().changeSelection(i, 0, false, false);
+//                    int selectedRow = vista.getTabla1().getSelectedRow();
+                    modelo.getModeloTI().removeRow(i);
+                }
+            }
+
+//            modelo.getModeloTI().removeRow(linea);
+
+            vista.getBtnBorrarTI().setEnabled(false);
+            vista.getJtxtCodigo().setEnabled(true);
+
+        }
+
     }
+
     public void borrarTipoInstrumentos() {
 
         String Codigo = vista.getJtxtCodigo().getText();
@@ -391,13 +398,12 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
             Socket socket = new Socket(HOST, PUERTO);
             System.out.println("Conectado");
             DataOutputStream salida = new DataOutputStream(socket.getOutputStream());
-          
+
             salida.writeUTF(tipo_de_accion);
             salida.writeUTF(Codigo);
             salida.writeUTF(Nombre);
             salida.writeUTF(Unidad);
-            
-            
+
             salida.close();
             socket.close();
         } catch (Exception ex) {
@@ -407,7 +413,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
 
     public void actualizarJComboBoxInstrumentos() {
         int total;
-      
+
         total = vista.getjCBTipoInstrumentos().getItemCount();
 
         for (int i = total; i > 0; i--) {
@@ -415,7 +421,6 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
         }
 
         try {
-            
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "error actualizarJComboBoxInstrumentos  " + e);
@@ -696,7 +701,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
         String instrumento = vista.getJlblInfoInstrumento().getText();
         String Fecha = vista.getJtxtFecha().getText();
         String numero_mediciones = vista.getJtxtMedicionesCalibracion().getText();
-    
+
 //        String referencia;
 //        String lectura;
         int posicion = -1;
@@ -722,7 +727,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
                     salida.writeUTF(NumCalibracion);
                     salida.writeUTF(instrumento);
                     salida.writeUTF(Fecha);
-                    salida.writeUTF(numero_mediciones);                
+                    salida.writeUTF(numero_mediciones);
                     DataInputStream entrada = new DataInputStream(socket.getInputStream());
 
                     //hacer validacion para mostrar el mensaje que cesar nos envie, si fue exitoso o no
@@ -783,7 +788,7 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
     }
 
     public void borrarCalibracion() {
-        
+
         String tipo_de_accion = "borrarCalibracion";
         String NumCalibracion = vista.getJtxtNumCalibracion().getText();
         String instrumento = vista.getJlblInfoInstrumento().getText();
@@ -793,34 +798,33 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
         if (vista.getTabla3Calibraciones().getSelectedRow() == -1) {
             JOptionPane.showMessageDialog(null, "Debes elegir la fila a eliminar", "ERROR", JOptionPane.ERROR_MESSAGE);
         } else {
-            int linea = vista.getTabla3Calibraciones().getSelectedRow();           
+            int linea = vista.getTabla3Calibraciones().getSelectedRow();
             modelo.getModeloCalibracion().removeRow(linea);
             modelo.getModeloMed().setRowCount(0);
             vista.getJtxtFecha().setText("");
             vista.getJtxtMedicionesCalibracion().setText("");
             try {
-                    Socket socket = new Socket(HOST, PUERTO);
-                    System.out.println("Conectado");
-                    DataOutputStream salida = new DataOutputStream(socket.getOutputStream());
-                    salida.writeUTF(tipo_de_accion);
-                    salida.writeUTF(NumCalibracion);
-                    salida.writeUTF(instrumento);
-                    salida.writeUTF(Fecha);
-                    salida.writeUTF(numero_mediciones);
-                    DataInputStream entrada = new DataInputStream(socket.getInputStream());
+                Socket socket = new Socket(HOST, PUERTO);
+                System.out.println("Conectado");
+                DataOutputStream salida = new DataOutputStream(socket.getOutputStream());
+                salida.writeUTF(tipo_de_accion);
+                salida.writeUTF(NumCalibracion);
+                salida.writeUTF(instrumento);
+                salida.writeUTF(Fecha);
+                salida.writeUTF(numero_mediciones);
+                DataInputStream entrada = new DataInputStream(socket.getInputStream());
 
-                    //hacer validacion para mostrar el mensaje que cesar nos envie, si fue exitoso o no
-                    String mensaje = (String) entrada.readUTF();
-                    JOptionPane.showMessageDialog(this.vista, mensaje);
+                //hacer validacion para mostrar el mensaje que cesar nos envie, si fue exitoso o no
+                String mensaje = (String) entrada.readUTF();
+                JOptionPane.showMessageDialog(this.vista, mensaje);
 
-                    salida.close();
-                    socket.close();
+                salida.close();
+                socket.close();
 
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            
-            
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
 //            for (int i = 0; i < modelo.getArrayC().getCantidad(); i++) {
 //                if (modelo.getArrayC().getElemento(i).getNumero().equals(numero)) {
 //                    modelo.getArrayC().getArrayList().remove(i);
@@ -944,8 +948,5 @@ public class Control implements ActionListener, MouseListener, WindowListener, R
     @Override
     public void windowDeactivated(WindowEvent e) {
     }
-
-  
-             
 
 }

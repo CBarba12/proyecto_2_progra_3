@@ -158,7 +158,8 @@ class ClientHandler implements Runnable {
             String resultado = borrarTipoInstrumentos_BASE(tipo_instru);
             
             if(resultado.equals("TiposInstrumentos eliminado")){
-                 sendMessageToAllClients(resultado);  
+                 sendMessageToAllClients(resultado); 
+                 sendMessageToAllClients(mensaje_2); 
             }
             
             
